@@ -1,0 +1,34 @@
+[project]
+name = "pymatk"
+version = "0.1.0"
+description = "Python Measurement Automation Toolkit"
+readme = "README.md"
+authors = [
+    { name = "Joe Wilcox", email = "jawninety@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.4.2",
+    "pandas>=3.0.0",
+    "pymeasure>=0.13.1",
+    "ruff>=0.14.14",
+    "simple-pid>=2.0.1",
+]
+
+[project.scripts]
+pymatk = "pymatk:main"
+
+[build-system]
+requires = ["uv_build>=0.9.24,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.uv]
+managed = true
+
+[tool.ruff]
+line-length = 79
