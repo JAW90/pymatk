@@ -1,5 +1,3 @@
-from .data.datafile import DataFile
-
 __name__ = "pymatk"
 
 
