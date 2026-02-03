@@ -14,3 +14,14 @@ time = {name = "time", units = "s", get_func = "time"}
 
 # [variables.LIA1]
 # x = {}
+
+[instruments.FAKE]
+module = "pymatk.fake_instruments"
+class = "ReturnsList"
+
+[variables.FAKE.faker]
+name = "faker"
+units = "s"
+get_func = "data"
+property = true
+return_element = 0

@@ -1,9 +1,10 @@
+import builtins
 import importlib
 import sys
 import tomllib
 
 from enum import StrEnum
-
+from operator import attrgetter
 from pymatk.data_structures import (
     # DataFile,
     VariablesCollection,
@@ -19,7 +20,8 @@ class ConfigFileEnums(StrEnum):
     NAME = "name"
     UNITS = "units"
     GET_FUNCTION = "get_func"
-
+    PROPERTY = "property"
+    RETURN_ELEMENT = "return_element"
 
 class BasicManager:
     def __init__(self, name, config_file: str):
@@ -56,9 +58,12 @@ class BasicManager:
                 self._instruments[instrument_name] = module
             else:
                 cls = getattr(module, config[ConfigFileEnums.CLASS])
-                self._instruments[instrument_name] = cls(
-                    **config[ConfigFileEnums.KWARGS]
-                )
+                if ConfigFileEnums.KWARGS not in config:
+                    self._instruments[instrument_name] = cls()
+                else:
+                    self._instruments[instrument_name] = cls(
+                        **config[ConfigFileEnums.KWARGS]
+                    )
 
     def initalise_variables(self):
         self._variables = VariablesCollection(self.name)
@@ -71,15 +76,43 @@ class BasicManager:
                 )
             else:
                 instrument = self._instruments[instrument_name]
-
                 for var_name, parameters in variable.items():
-                    method = getattr(
-                        instrument, parameters[ConfigFileEnums.GET_FUNCTION]
-                    )
+                    if (ConfigFileEnums.PROPERTY not in parameters and
+                         ConfigFileEnums.RETURN_ELEMENT not in parameters
+                         ):
+                        method = getattr(
+                            instrument, parameters[ConfigFileEnums.GET_FUNCTION]
+                        )
+                    elif (ConfigFileEnums.PROPERTY not in parameters and
+                         ConfigFileEnums.RETURN_ELEMENT in parameters
+                         ):
+                        method = getattr(
+                            instrument, parameters[ConfigFileEnums.GET_FUNCTION]
+                        )[parameters[ConfigFileEnums.RETURN_ELEMENT]]
+                    elif (ConfigFileEnums.PROPERTY in parameters and
+                         parameters[ConfigFileEnums.PROPERTY] and
+                         ConfigFileEnums.RETURN_ELEMENT not in parameters
+                         ):
+                        method = lambda: getattr(
+                            instrument,
+                            parameters[ConfigFileEnums.GET_FUNCTION]
+                        )
+                    elif (ConfigFileEnums.PROPERTY in parameters and
+                         parameters[ConfigFileEnums.PROPERTY] and
+                         ConfigFileEnums.RETURN_ELEMENT in parameters
+                         ):
+                        method = lambda: getattr(
+                            instrument,
+                            parameters[ConfigFileEnums.GET_FUNCTION]
+                        )[parameters[ConfigFileEnums.RETURN_ELEMENT]]
+                    else:
+                        raise AttributeError(
+                            "Bad Configuration {}".format(parameters)
+                            )
                     self._variables.add_variable(
-                        parameters[ConfigFileEnums.NAME],
-                        parameters[ConfigFileEnums.UNITS],
-                        method,
+                    parameters[ConfigFileEnums.NAME],
+                    parameters[ConfigFileEnums.UNITS],
+                    method,
                     )
 
     def update_variables(self):
@@ -87,4 +120,5 @@ class BasicManager:
 
     @property
     def all_values(self) -> dict:
+        self.update_variables()
         return self._variables.all_values
