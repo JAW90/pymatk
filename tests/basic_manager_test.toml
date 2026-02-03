@@ -11,3 +11,4 @@ kwargs = {adapter = "GPIB0::1::INSTR"}
 
 [variables.LIA1]
 x = {}
+cast = "float"
