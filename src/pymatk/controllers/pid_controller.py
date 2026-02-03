@@ -82,9 +82,7 @@ class PIDController(PID):
         last_output = self._last_output
         new_output = super().__call__(input_, dt)
         # Check if current measurement is within deadband of setpoint
-        if self._is_in_deadband(input=input_) and (
-            last_output is not None
-        ):
+        if self._is_in_deadband(input=input_) and (last_output is not None):
             # If in deadband, return last output
             return last_output
         else:
