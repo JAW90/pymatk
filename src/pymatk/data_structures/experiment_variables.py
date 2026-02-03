@@ -48,21 +48,22 @@ class VariablesCollection:
 
     # TODO: __str__ ?
 
-    def add_variable(self, variable: ExperimentVariable):
-        variable_name = variable.name
-
-        if variable_name in self._variables:
+    def add_variable(
+        self, name: str, units: str | None, get_function: Callable
+    ):
+        if name in self._variables:
             raise KeyError(
-                f"{variable_name} already added to"
+                f"{name} already added to"
                 + f" {type(self).__name__} '{self.name}'."
             )
         else:
-            self._variables[variable_name] = variable
+            new_variable = ExperimentVariable(name, units, get_function)
+            self._variables[name] = new_variable
 
     @property
-    def variable_columns(self) -> dict:
+    def variables_as_columns(self) -> dict:
         """
-        Docstring for variable_columns
+        Docstring for variables_as_columns
 
         :param self: Description
         :return: Description
@@ -95,3 +96,7 @@ class VariablesCollection:
         """
         variables_values = {k: v._value for k, v in self._variables.items()}
         return variables_values
+
+    def update_variables(self):
+        for var_name, variable in self._variables.items():
+            variable._value = variable.get_func()

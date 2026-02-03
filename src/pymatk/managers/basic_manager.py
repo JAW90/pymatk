@@ -2,63 +2,89 @@ import importlib
 import sys
 import tomllib
 
+from enum import StrEnum
+
 from pymatk.data_structures import (
     # DataFile,
     VariablesCollection,
 )
-from pathlib import Path
+
+
+class ConfigFileEnums(StrEnum):
+    INSTRUMENTS = "instruments"
+    MODULE = "module"
+    CLASS = "class"
+    KWARGS = "kwargs"
+    VARIABLES = "variables"
+    NAME = "name"
+    UNITS = "units"
+    GET_FUNCTION = "get_func"
 
 
 class BasicManager:
-    def __init__(self, name, config_file: Path | str):
+    def __init__(self, name, config_file: str):
         self.name = name
         self._instruments = {}
-        # TODO: check file exists
-        # TODO: check is a TOML file
-        # TODO: Read file into config dict
 
-        # try:
-        #     with open(config_file, 'rb') as f:
-        #         self._config = tomllib.load(f)
-        # except:
-        #     print(f"Could not load config {config_file}!")
-        #     ...
+        if not config_file.endswith(".toml"):
+            raise ValueError("Not a valid .toml configuration files.")
 
-        with open(config_file, "rb") as f:
-            self._config = tomllib.load(f)
+        try:
+            with open(config_file, "rb") as f:
+                self._config = tomllib.load(f)
+        except FileNotFoundError:
+            print(f"Config file not found: {config_file}")
 
         # Read all the instruments and load modules
-
-        for instrument_name, config in self._config["instruments"].items():
-            if "class" not in config:
-                if config["module"] not in sys.modules:
-                    module = importlib.import_module(config["module"])
-                    self._instruments[instrument_name] = module
-                else:
-                    print(f"{config["module"]} in namespace")
-                    self._instruments[instrument_name] = sys.modules[
-                        config["module"]
-                    ]
-            else:
-                if f"{config['module']}.{config['class']}" not in sys.modules:
-                    module = importlib.import_module(config["module"])
-                    cls = getattr(module, config["class"])
-                    self._instruments[instrument_name] = cls(
-                        **config["kwargs"]
-                    )
-                else:
-                    self._instruments[instrument_name] = sys.modules[
-                        f"{config['module']}.{config['class']}"
-                    ]
-
+        self.load_instruments()
         # Setup variables collection
+        self.initalise_variables()
+        # TODO: Setup datafile
 
-        # self.initalise_variables()
+    def load_instruments(self):
+        for instrument_name, config in self._config[
+            ConfigFileEnums.INSTRUMENTS
+        ].items():
+            if config[ConfigFileEnums.MODULE] not in sys.modules:
+                module = importlib.import_module(
+                    config[ConfigFileEnums.MODULE]
+                )
+            else:
+                module = sys.modules[config[ConfigFileEnums.MODULE]]
+
+            if ConfigFileEnums.CLASS not in config:
+                self._instruments[instrument_name] = module
+            else:
+                cls = getattr(module, config[ConfigFileEnums.CLASS])
+                self._instruments[instrument_name] = cls(
+                    **config[ConfigFileEnums.KWARGS]
+                )
 
     def initalise_variables(self):
         self._variables = VariablesCollection(self.name)
-        for k, v in self._config["variables"].items():
-            print(k, v)
+        for instrument_name, variable in self._config[
+            ConfigFileEnums.VARIABLES
+        ].items():
+            if instrument_name not in self._instruments:
+                raise KeyError(
+                    f"{instrument_name} not loaded yet in this collection."
+                )
+            else:
+                instrument = self._instruments[instrument_name]
+
+                for var_name, parameters in variable.items():
+                    method = getattr(
+                        instrument, parameters[ConfigFileEnums.GET_FUNCTION]
+                    )
+                    self._variables.add_variable(
+                        parameters[ConfigFileEnums.NAME],
+                        parameters[ConfigFileEnums.UNITS],
+                        method,
+                    )
 
     def update_variables(self):
-        pass
+        self._variables.update_variables()
+
+    @property
+    def all_values(self) -> dict:
+        return self._variables.all_values
