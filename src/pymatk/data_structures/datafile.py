@@ -2,6 +2,8 @@ import pandas as pd
 
 from dataclasses import dataclass
 
+# TODO: Add docstring
+
 
 @dataclass
 class DataFile:

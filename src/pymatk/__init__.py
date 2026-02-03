@@ -2,4 +2,4 @@ __name__ = "pymatk"
 
 
 def main() -> None:
-    print("Hello from pymatk!")
+    print(f"Hello from {__name__}")

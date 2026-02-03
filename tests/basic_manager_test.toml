@@ -1,0 +1,13 @@
+[instruments.CLOCK]
+module = "time"
+
+[variables.CLOCK]
+time = {name = "time", units = "s", get_func = "time"}
+
+[instruments.LIA1]
+module = "pymeasure.instruments.srs"
+class = "SR830"
+kwargs = {adapter = "GPIB0::1::INSTR"}
+
+[variables.LIA1]
+x = {}
