@@ -2,32 +2,17 @@ from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Dict
 
+# TODO: Add docstrings
 
 @dataclass
 class ExperimentVariable:
-    """
-    Docstring for ExperimentVariable
-    """
-
     units: str | None
     get_func: Callable
     _value: object = None
 
 
 class VariablesCollection:
-    """
-    Docstring for VariablesCollection
-    """
-
     def __init__(self, name, variables: Dict[str, ExperimentVariable] | None = None):
-        """
-        Docstring for __init__
-
-        :param self: Description
-        :param name: Description
-        :param variables: Description
-        :type variables: Dict[str, ExperimentVariable] | None
-        """
         self.name = name
 
         if variables is not None:
@@ -42,7 +27,7 @@ class VariablesCollection:
             repr_string += f"\n{name}: {variable}"
         return repr_string
 
-    # TODO: __str__ ?
+    # TODO: add __str__ function?
 
     def add_variable(self, name: str, units: str | None, get_function: Callable):
         if name in self._variables:
@@ -55,36 +40,15 @@ class VariablesCollection:
 
     @property
     def variables_as_columns(self) -> list:
-        """
-        Docstring for variables_as_columns
-
-        :param self: Description
-        :return: Description
-        :rtype: dict[Any, Any]
-        """
         columns = [f"{name}({variable.units})" for name, variable in self._variables.items()]
         return columns
 
     @property
     def all_variables(self) -> dict:
-        """
-        Docstring for all_variables
-
-        :param self: Description
-        :return: Description
-        :rtype: dict[Any, Any]
-        """
         return self._variables
 
     @property
     def latest_values(self) -> dict:
-        """
-        Docstring for all_values
-
-        :param self: Description
-        :return: Description
-        :rtype: dict[Any, Any]
-        """
         variables_values = {
             f"{name}({variable.units})": variable._value
             for name, variable in self._variables.items()

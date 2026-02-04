@@ -4,6 +4,8 @@ import sys
 from pymatk.data_structures import VariablesCollection, DataConfig
 from pymatk.loaders import InstrumentEnums, VariableEnums, DataEnums
 
+# TODO: Add docstrings
+
 
 def _create_property_to_function(
     instrument: object, prop: str, return_element: int | str | None = None
@@ -20,6 +22,9 @@ def _create_property_to_function(
             return getattr(instrument, prop)
 
         return property_to_function
+
+
+# TODO: Implement instruments initialisation
 
 
 class ConfigLoader:
@@ -87,7 +92,7 @@ class ConfigLoader:
 
     def initialise_variables(self):
         if self._instruments is None:
-            raise AttributeError("No value instruments.")
+            raise AttributeError("No valid instruments.")
 
         self._variables = VariablesCollection(self.description)
         for instrument_name, variable in self._config[VariableEnums.VARIABLES].items():

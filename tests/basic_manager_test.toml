@@ -10,20 +10,47 @@ module = "time"
 units = "s"
 get_func = "time"
 
-# [instruments.LIA1]
-# module = "pymeasure.instruments.srs"
-# class = "SR830"
-# kwargs = {adapter = "GPIB0::1::INSTR"}
+[instruments.LIA1]
+module = "pymeasure.instruments.srs"
+class = "SR830"
+kwargs = {adapter = "GPIB0::2::INSTR"}
 
-# [variables.LIA1]
-# x = {}
+[instruments.LIA2]
+module = "pymeasure.instruments.srs"
+class = "SR830"
+kwargs = {adapter = "GPIB0::2::INSTR"}
 
-[instruments.FAKE]
-module = "pymatk.fake_instruments"
-class = "ReturnsList"
+[instruments.LIA3]
+module = "pymeasure.instruments.srs"
+class = "SR830"
+kwargs = {adapter = "GPIB0::2::INSTR"}
 
-[variables.FAKE.faker]
-units = ""
-get_func = "data"
+[variables.LIA1.x1]
+units = "V"
+get_func = "x"
 is_property = true
-return_element = 1
+
+[variables.LIA1.f]
+units = "Hz"
+get_func = "frequency"
+is_property = true
+
+[variables.LIA2.x2]
+units = "V"
+get_func = "x"
+is_property = true
+
+[variables.LIA3.x3]
+units = "V"
+get_func = "x"
+is_property = true
+
+# [instruments.FAKE]
+# module = "pymatk.fake_instruments"
+# class = "ReturnsList"
+
+# [variables.FAKE.faker]
+# units = ""
+# get_func = "data"
+# is_property = true
+# return_element = 1

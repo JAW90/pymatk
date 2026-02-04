@@ -5,7 +5,9 @@ import tomllib
 from pymatk.data_structures import DataFile
 from pymatk.loaders import ConfigLoader
 
-# TODO: Logging / debugging
+# TODO: Implement logging and debugging
+
+# TODO: Add docstrings
 
 
 class BasicManager:
