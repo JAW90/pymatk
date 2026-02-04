@@ -31,4 +31,4 @@ dev = [
 managed = true
 
 [tool.ruff]
-line-length = 79
+line-length = 99

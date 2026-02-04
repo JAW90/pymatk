@@ -1,33 +1,36 @@
-import importlib
-import sys
+import threading
+import time
 import tomllib
 
-from enum import StrEnum
+from pymatk.data_structures import DataFile
+from pymatk.loaders import ConfigLoader
 
-from pymatk.data_structures import (
-    # DataFile,
-    VariablesCollection,
-)
+# TODO: Implement logging and debugging
 
-
-class ConfigFileEnums(StrEnum):
-    INSTRUMENTS = "instruments"
-    MODULE = "module"
-    CLASS = "class"
-    KWARGS = "kwargs"
-    VARIABLES = "variables"
-    NAME = "name"
-    UNITS = "units"
-    GET_FUNCTION = "get_func"
+# TODO: Add docstrings
 
 
 class BasicManager:
-    def __init__(self, name, config_file: str):
-        self.name = name
-        self._instruments = {}
+    """
+    BasicManager: loads a config file, loads instruments, configures variables,
+    createa a datafile and, optionally, starts a thread to collect data indefinitely.
+    """
+
+    def __init__(
+        self,
+        description,
+        config_file: str,
+        update_time: float = 0.25,
+        running: bool = True,
+        debug: bool = False,
+    ):
+        self.description = description
+        self._running = running
+        self._update_time = update_time
+        self.debug = debug
 
         if not config_file.endswith(".toml"):
-            raise ValueError("Not a valid .toml configuration files.")
+            raise FileNotFoundError("Not a valid .toml configuration file.")
 
         try:
             with open(config_file, "rb") as f:
@@ -35,56 +38,30 @@ class BasicManager:
         except FileNotFoundError:
             print(f"Config file not found: {config_file}")
 
-        # Read all the instruments and load modules
-        self.load_instruments()
-        # Setup variables collection
-        self.initalise_variables()
-        # TODO: Setup datafile
+        cfg_loader = ConfigLoader(self.description, self._config)
 
-    def load_instruments(self):
-        for instrument_name, config in self._config[
-            ConfigFileEnums.INSTRUMENTS
-        ].items():
-            if config[ConfigFileEnums.MODULE] not in sys.modules:
-                module = importlib.import_module(
-                    config[ConfigFileEnums.MODULE]
-                )
-            else:
-                module = sys.modules[config[ConfigFileEnums.MODULE]]
+        self._instruments = cfg_loader.instruments
+        self._variables = cfg_loader.variables
+        self._data_config = cfg_loader.data_config
 
-            if ConfigFileEnums.CLASS not in config:
-                self._instruments[instrument_name] = module
-            else:
-                cls = getattr(module, config[ConfigFileEnums.CLASS])
-                self._instruments[instrument_name] = cls(
-                    **config[ConfigFileEnums.KWARGS]
-                )
+        self._thread = threading.Thread(target=self._main_loop, daemon=True)
 
-    def initalise_variables(self):
-        self._variables = VariablesCollection(self.name)
-        for instrument_name, variable in self._config[
-            ConfigFileEnums.VARIABLES
-        ].items():
-            if instrument_name not in self._instruments:
-                raise KeyError(
-                    f"{instrument_name} not loaded yet in this collection."
-                )
-            else:
-                instrument = self._instruments[instrument_name]
+        if running:
+            self.setup_new_datafile()
+            self._thread.start()
 
-                for var_name, parameters in variable.items():
-                    method = getattr(
-                        instrument, parameters[ConfigFileEnums.GET_FUNCTION]
-                    )
-                    self._variables.add_variable(
-                        parameters[ConfigFileEnums.NAME],
-                        parameters[ConfigFileEnums.UNITS],
-                        method,
-                    )
+    def setup_new_datafile(self):
+        path, name = self._data_config.generate_new_file_path()
+        filename = f"{path}/{name}.csv"
+        columns = self._variables.variables_as_columns
+        self._data_config.create_directory(path)
+        self._datafile = DataFile(filename, columns)
 
-    def update_variables(self):
-        self._variables.update_variables()
-
-    @property
-    def all_values(self) -> dict:
-        return self._variables.all_values
+    def _main_loop(self):
+        if self._running:
+            while True:
+                self._variables.update_variables()
+                self._datafile.append_to_csv(self._variables.latest_values)
+                if self.debug:
+                    print(self._variables.latest_values)
+                time.sleep(self._update_time)
