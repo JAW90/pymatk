@@ -1,14 +1,30 @@
-import builtins
 import importlib
 import sys
 import tomllib
 
 from enum import StrEnum
-from operator import attrgetter
+
 from pymatk.data_structures import (
     # DataFile,
     VariablesCollection,
 )
+
+
+def _create_property_to_function(
+    instrument: object, prop: str, return_element: int | str | None = None
+):
+    if return_element is not None:
+
+        def property_element_to_function():
+            return getattr(instrument, prop)[return_element]
+
+        return property_element_to_function
+    else:
+
+        def property_to_function():
+            return getattr(instrument, prop)
+
+        return property_to_function
 
 
 class ConfigFileEnums(StrEnum):
@@ -22,6 +38,7 @@ class ConfigFileEnums(StrEnum):
     GET_FUNCTION = "get_func"
     PROPERTY = "property"
     RETURN_ELEMENT = "return_element"
+
 
 class BasicManager:
     def __init__(self, name, config_file: str):
@@ -48,9 +65,15 @@ class BasicManager:
             ConfigFileEnums.INSTRUMENTS
         ].items():
             if config[ConfigFileEnums.MODULE] not in sys.modules:
-                module = importlib.import_module(
-                    config[ConfigFileEnums.MODULE]
-                )
+                try:
+                    module = importlib.import_module(
+                        config[ConfigFileEnums.MODULE]
+                    )
+                except ImportError:
+                    print(
+                        f"Cannot import {config[ConfigFileEnums.MODULE]}!" +
+                        " Check Python environment, or possible bad configuration."
+                    )
             else:
                 module = sys.modules[config[ConfigFileEnums.MODULE]]
 
@@ -77,42 +100,29 @@ class BasicManager:
             else:
                 instrument = self._instruments[instrument_name]
                 for var_name, parameters in variable.items():
-                    if (ConfigFileEnums.PROPERTY not in parameters and
-                         ConfigFileEnums.RETURN_ELEMENT not in parameters
-                         ):
+                    return_element = parameters.get(
+                        ConfigFileEnums.RETURN_ELEMENT
+                    )  # Returns None if not present
+                    if ConfigFileEnums.PROPERTY not in parameters:
                         method = getattr(
-                            instrument, parameters[ConfigFileEnums.GET_FUNCTION]
-                        )
-                    elif (ConfigFileEnums.PROPERTY not in parameters and
-                         ConfigFileEnums.RETURN_ELEMENT in parameters
-                         ):
-                        method = getattr(
-                            instrument, parameters[ConfigFileEnums.GET_FUNCTION]
-                        )[parameters[ConfigFileEnums.RETURN_ELEMENT]]
-                    elif (ConfigFileEnums.PROPERTY in parameters and
-                         parameters[ConfigFileEnums.PROPERTY] and
-                         ConfigFileEnums.RETURN_ELEMENT not in parameters
-                         ):
-                        method = lambda: getattr(
                             instrument,
-                            parameters[ConfigFileEnums.GET_FUNCTION]
+                            parameters[ConfigFileEnums.GET_FUNCTION],
+                            return_element,
                         )
-                    elif (ConfigFileEnums.PROPERTY in parameters and
-                         parameters[ConfigFileEnums.PROPERTY] and
-                         ConfigFileEnums.RETURN_ELEMENT in parameters
-                         ):
-                        method = lambda: getattr(
+                    elif parameters[ConfigFileEnums.PROPERTY]:
+                        method = _create_property_to_function(
                             instrument,
-                            parameters[ConfigFileEnums.GET_FUNCTION]
-                        )[parameters[ConfigFileEnums.RETURN_ELEMENT]]
+                            parameters[ConfigFileEnums.GET_FUNCTION],
+                            return_element,
+                        )
                     else:
                         raise AttributeError(
                             "Bad Configuration {}".format(parameters)
-                            )
+                        )
                     self._variables.add_variable(
-                    parameters[ConfigFileEnums.NAME],
-                    parameters[ConfigFileEnums.UNITS],
-                    method,
+                        parameters[ConfigFileEnums.NAME],
+                        parameters[ConfigFileEnums.UNITS],
+                        method,
                     )
 
     def update_variables(self):

@@ -3,7 +3,6 @@ import random
 
 
 class ReturnsList:
-
     @property
     def data(self):
         timenow = time.time()
