@@ -68,9 +68,7 @@ class PIDController(PID):
 
     def _limit_rate(self, new_output: float, last_output: float) -> float:
         if np.abs(last_output - new_output) > self.output_rate_limit:
-            return last_output - self.output_rate_limit * np.sign(
-                last_output - new_output
-            )
+            return last_output - self.output_rate_limit * np.sign(last_output - new_output)
         else:
             return new_output
 

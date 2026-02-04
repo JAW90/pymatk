@@ -34,9 +34,7 @@ class DataFile:
         :param data: Description
         """
         self.current_data.loc[0] = data
-        self.current_data.to_csv(
-            self.filepath, mode="a", header=False, index=False
-        )
+        self.current_data.to_csv(self.filepath, mode="a", header=False, index=False)
 
     def get_all_data(self):
         """

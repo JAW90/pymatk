@@ -4,8 +4,9 @@ path = "C:\\data\\joe"
 [instruments.CLOCK]
 module = "time"
 
-[variables.CLOCK]
-time = {name = "time", units = "s", get_func = "time"}
+[variables.CLOCK.time]
+units = "s"
+get_func = "time"
 
 # [instruments.LIA1]
 # module = "pymeasure.instruments.srs"
@@ -20,8 +21,7 @@ module = "pymatk.fake_instruments"
 class = "ReturnsList"
 
 [variables.FAKE.faker]
-name = "faker"
 units = "s"
 get_func = "data"
-property = true
-return_element = 0
+is_property = true
+return_element = 1

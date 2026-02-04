@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Dict
-# from enum import IntEnum, auto
 
 
 @dataclass
@@ -10,7 +9,6 @@ class ExperimentVariable:
     Docstring for ExperimentVariable
     """
 
-    name: str
     units: str | None
     get_func: Callable
     _value: object = None
@@ -21,9 +19,7 @@ class VariablesCollection:
     Docstring for VariablesCollection
     """
 
-    def __init__(
-        self, name, variables: Dict[str, ExperimentVariable] | None = None
-    ):
+    def __init__(self, name, variables: Dict[str, ExperimentVariable] | None = None):
         """
         Docstring for __init__
 
@@ -42,22 +38,19 @@ class VariablesCollection:
     def __repr__(self) -> str:
         class_name = type(self).__name__
         repr_string = f"{class_name}: '{self.name}'\n Items:"
-        for k, v in self._variables.items():
-            repr_string += f"\n{k}: {v}"
+        for name, variable in self._variables.items():
+            repr_string += f"\n{name}: {variable}"
         return repr_string
 
     # TODO: __str__ ?
 
-    def add_variable(
-        self, name: str, units: str | None, get_function: Callable
-    ):
+    def add_variable(self, name: str, units: str | None, get_function: Callable):
         if name in self._variables:
             raise KeyError(
-                f"{name} already added to"
-                + f" {type(self).__name__} '{self.name}'."
+                f"Variable with {name} already added to" + f" {type(self).__name__} '{self.name}'."
             )
         else:
-            new_variable = ExperimentVariable(name, units, get_function)
+            new_variable = ExperimentVariable(units, get_function)
             self._variables[name] = new_variable
 
     @property
@@ -69,9 +62,7 @@ class VariablesCollection:
         :return: Description
         :rtype: dict[Any, Any]
         """
-        columns = {
-            k: f"{v.name}({v.units})" for k, v in self._variables.items()
-        }
+        columns = {name: f"{name}({variable.units})" for name, variable in self._variables.items()}
         return columns
 
     @property
@@ -94,7 +85,7 @@ class VariablesCollection:
         :return: Description
         :rtype: dict[Any, Any]
         """
-        variables_values = {k: v._value for k, v in self._variables.items()}
+        variables_values = {name: variable._value for name, variable in self._variables.items()}
         return variables_values
 
     def update_variables(self):
