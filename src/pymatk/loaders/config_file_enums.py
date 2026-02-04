@@ -14,3 +14,9 @@ class VariableEnums(StrEnum):
     GET_FUNCTION = "get_func"
     PROPERTY = "is_property"
     RETURN_ELEMENT = "return_element"
+
+
+class DataEnums(StrEnum):
+    DATA = "data"
+    OUTPUT_DIRECTORY = "output_directory"
+    FILESTEM = "filestem"

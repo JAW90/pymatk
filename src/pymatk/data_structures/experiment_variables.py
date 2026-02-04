@@ -54,7 +54,7 @@ class VariablesCollection:
             self._variables[name] = new_variable
 
     @property
-    def variables_as_columns(self) -> dict:
+    def variables_as_columns(self) -> list:
         """
         Docstring for variables_as_columns
 
@@ -62,7 +62,7 @@ class VariablesCollection:
         :return: Description
         :rtype: dict[Any, Any]
         """
-        columns = {name: f"{name}({variable.units})" for name, variable in self._variables.items()}
+        columns = [f"{name}({variable.units})" for name, variable in self._variables.items()]
         return columns
 
     @property
@@ -77,7 +77,7 @@ class VariablesCollection:
         return self._variables
 
     @property
-    def all_values(self) -> dict:
+    def latest_values(self) -> dict:
         """
         Docstring for all_values
 
@@ -85,7 +85,10 @@ class VariablesCollection:
         :return: Description
         :rtype: dict[Any, Any]
         """
-        variables_values = {name: variable._value for name, variable in self._variables.items()}
+        variables_values = {
+            f"{name}({variable.units})": variable._value
+            for name, variable in self._variables.items()
+        }
         return variables_values
 
     def update_variables(self):

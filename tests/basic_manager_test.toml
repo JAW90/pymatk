@@ -1,5 +1,7 @@
-[data_directoy]
-path = "C:\\data\\joe"
+[data]
+output_directory = "C:\\data\\joe"
+filestem = "my_basic_manager"
+
 
 [instruments.CLOCK]
 module = "time"
@@ -21,7 +23,7 @@ module = "pymatk.fake_instruments"
 class = "ReturnsList"
 
 [variables.FAKE.faker]
-units = "s"
+units = ""
 get_func = "data"
 is_property = true
 return_element = 1

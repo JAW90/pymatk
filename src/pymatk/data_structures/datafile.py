@@ -1,8 +1,29 @@
+import datetime
+import os
 import pandas as pd
 
 from dataclasses import dataclass
 
 # TODO: Add docstring
+
+
+@dataclass
+class DataConfig:
+    output_directory: str
+    filestem: str
+
+    def generate_new_file_path(self):
+        now = datetime.datetime.now()
+        ymd_hms = now.strftime("%y%m%d_%H%M%S")
+        ymd = now.strftime("%y%m%d")
+        return (
+            f"{self.output_directory}/{self.filestem}/{ymd}",
+            f"{self.filestem}_{ymd_hms}",
+        )
+
+    def create_directory(self, path):
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
 
 @dataclass
@@ -21,6 +42,8 @@ class DataFile:
         :param self: Description
         """
         self.header = ",".join(self.columns)
+        if not self.filepath.endswith(".csv"):
+            self.filepath += ".csv"
         with open(self.filepath, "w") as f:
             f.write(f"{self.header}\n")
         self.data: pd.DataFrame = pd.read_csv(self.filepath, header=0)

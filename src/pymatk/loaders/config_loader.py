@@ -1,8 +1,8 @@
 import importlib
 import sys
 
-from pymatk.data_structures import VariablesCollection
-from pymatk.loaders import InstrumentEnums, VariableEnums
+from pymatk.data_structures import VariablesCollection, DataConfig
+from pymatk.loaders import InstrumentEnums, VariableEnums, DataEnums
 
 
 def _create_property_to_function(
@@ -26,20 +26,37 @@ class ConfigLoader:
     def __init__(self, description: str, config: dict):
         self.description = description
         self._config = config
-        self._instruments = {}
-        self._variables = None
-        self._outputs = {}
+        # self._data_config = None
+        # self._instruments = None
+        # self._variables = None
+        # self._outputs = None
 
-        # Load and configure instruments
+        if DataEnums.DATA in self._config:
+            self.load_data_config()
+        else:
+            raise AttributeError("No data configuration in config file. Check configuratoin.")
+
         if InstrumentEnums.INSTRUMENTS in self._config:
             self.load_instruments()
         else:
             raise AttributeError("No instruments in config file. Check configuration.")
 
         if VariableEnums.VARIABLES in self._config:
-            self.initalise_variables()
+            self.initialise_variables()
+        else:
+            raise AttributeError("No variables in config file. Check configuration.")
+
+    def load_data_config(self):
+        output_directory = self._config[DataEnums.DATA].get(DataEnums.OUTPUT_DIRECTORY)
+        if output_directory is None:
+            raise AttributeError(f"No '{DataEnums.OUTPUT_DIRECTORY}' specified.")
+        filestem = self._config[DataEnums.DATA].get(DataEnums.FILESTEM)
+        if filestem is None:
+            raise AttributeError(f"No '{DataEnums.FILESTEM}' specified.")
+        self._data_config = DataConfig(output_directory, filestem)
 
     def load_instruments(self):
+        self._instruments = {}
         for instrument_name, config in self._config[InstrumentEnums.INSTRUMENTS].items():
             if config[InstrumentEnums.MODULE] not in sys.modules:
                 try:
@@ -60,21 +77,24 @@ class ConfigLoader:
                     cls = getattr(module, config[InstrumentEnums.CLASS])
                 except AttributeError:
                     raise AttributeError(
-                        f"Cannot find class {cls} in module {module}!" +
-                        " Check configuration file for typos."
+                        f"Cannot find class {cls} in module {module}!"
+                        + " Check configuration file for typos."
                     )
                 if InstrumentEnums.KWARGS not in config:
                     self._instruments[instrument_name] = cls()
                 else:
                     self._instruments[instrument_name] = cls(**config[InstrumentEnums.KWARGS])
 
-    def initalise_variables(self):
+    def initialise_variables(self):
+        if self._instruments is None:
+            raise AttributeError("No value instruments.")
+
         self._variables = VariablesCollection(self.description)
         for instrument_name, variable in self._config[VariableEnums.VARIABLES].items():
             if instrument_name not in self._instruments:
                 raise KeyError(
-                    f"'{instrument_name}' not in this collection." +
-                    " Check configuration file - is this instrument defined?"
+                    f"'{instrument_name}' not in this collection."
+                    + " Check configuration file - is this instrument defined?"
                 )
             else:
                 instrument = self._instruments[instrument_name]
@@ -113,3 +133,7 @@ class ConfigLoader:
     @property
     def config(self):
         return self._config
+
+    @property
+    def data_config(self):
+        return self._data_config
