@@ -41,7 +41,10 @@ class VariablesCollection:
 
     @property
     def variables_as_columns(self) -> list:
-        columns = [f"{name}({variable.units})" for name, variable in self._variables.items()]
+        columns = [
+            f"{name}({variable.units})" if variable.units is not None else f"{name}"
+            for name, variable in self._variables.items()
+        ]
         return columns
 
     @property
@@ -51,7 +54,9 @@ class VariablesCollection:
     @property
     def latest_values(self) -> dict:
         variables_values = {
-            f"{name}({variable.units})": variable._value
+            (
+                f"{name}({variable.units})" if variable.units is not None else f"{name}:"
+            ): variable._value
             for name, variable in self._variables.items()
         }
         return variables_values

@@ -1,0 +1,97 @@
+[data]
+output_directory = "C:\\data\\joe"
+filestem = "my_basic_manager"
+
+[instruments.TIME_KEEPER]
+module = "pymatk.software_instruments"
+class = "TimeKeeper"
+initialise = [{init_func = "restart"}]
+
+[instruments.RANDOMGEN]
+module = "pymatk.software_instruments"
+class = "RandomGenerator"
+
+[variables.TIME_KEEPER]
+time = {units = "s", get_func= "elapsed_time"}
+unix_time = {units = "s", get_func= "unix_time"}
+
+[variables.RANDOMGEN]
+one_random_prop = {get_func= "new_random_number"}
+one_random_func = {get_func= "get_random_number"}
+two_randoms_prop = {get_func= "two_random_numbers", return_element=0}
+two_randoms_func = {get_func= "get_two_random_numbers", return_element=1}
+
+
+# [instruments.CLOCK]
+# module = "time"
+
+# [variables.CLOCK.time]
+# units = "s"
+# get_func = "time"
+
+# [instruments.iTC]
+# module = "pymeasure.instruments.oxfordinstruments"
+# class = "MercuryiTC"
+# kwargs = {adapter = "GPIB0::1::INSTR"}
+# initialise = [
+#     {init_func = "add_temperature_sensor", kwargs = {id = "DB6.T1"}, is_property = false},
+# ]
+
+# [variables.iTC.T1]
+# units = "K"
+# get_func = "TS_MB.temperature"
+# is_property = true
+
+# [variables.iTC.T2]
+# units = "K"
+# get_func = "TS['DB6.T1'].temperature"
+# is_property = true
+
+# [instruments.LIA1]
+# module = "pymeasure.instruments.srs"
+# class = "SR830"
+# kwargs = {adapter = "GPIB0::2::INSTR"}
+# initialise = [
+#     {init_func = "sensitivity", is_property = true, value = 500e-3},
+#     {init_func = "frequency", is_property = true, value = 50}
+# ]
+
+# [instruments.LIA2]
+# module = "pymeasure.instruments.srs"
+# class = "SR830"
+# kwargs = {adapter = "GPIB0::3::INSTR"}
+
+# [instruments.LIA3]
+# module = "pymeasure.instruments.srs"
+# class = "SR830"
+# kwargs = {adapter = "GPIB0::4::INSTR"}
+
+# [variables.LIA1.x1]
+# units = "V"
+# get_func = "x"
+# is_property = true
+
+# [variables.LIA1.f]
+# units = "Hz"
+# get_func = "frequency"
+# is_property = true
+
+# [variables.LIA2.x2]
+# units = "V"
+# get_func = "x"
+# is_property = true
+
+# [variables.LIA3.x3]
+# units = "V"
+# get_func = "x"
+# is_property = true
+
+# [instruments.FAKE]
+# module = "pymatk.fake_instruments"
+# class = "ReturnsList"
+
+# [variables.FAKE.faker]
+# units = ""
+# get_func = "data"
+# is_property = true
+# return_element = 1

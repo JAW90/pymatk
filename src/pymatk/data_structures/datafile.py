@@ -7,6 +7,11 @@ from dataclasses import dataclass
 # TODO: Add docstrings
 
 
+def create_directory(path):
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
+
 @dataclass
 class DataConfig:
     output_directory: str
@@ -20,10 +25,6 @@ class DataConfig:
             f"{self.output_directory}/{self.filestem}/{ymd}",
             f"{self.filestem}_{ymd_hms}",
         )
-
-    def create_directory(self, path):
-        if not os.path.isdir(path):
-            os.makedirs(path)
 
 
 @dataclass

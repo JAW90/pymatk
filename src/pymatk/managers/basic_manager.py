@@ -2,10 +2,12 @@ import threading
 import time
 import tomllib
 
-from pymatk.data_structures import DataFile
+from pymatk.data_structures import DataFile, create_directory
 from pymatk.loaders import ConfigLoader
 
 # TODO: Implement logging and debugging
+
+# TODO: How to start and stop?
 
 # TODO: Add docstrings
 
@@ -54,12 +56,12 @@ class BasicManager:
         path, name = self._data_config.generate_new_file_path()
         filename = f"{path}/{name}.csv"
         columns = self._variables.variables_as_columns
-        self._data_config.create_directory(path)
+        create_directory(path)
         self._datafile = DataFile(filename, columns)
 
     def _main_loop(self):
-        if self._running:
-            while True:
+        while True:
+            if self._running:
                 self._variables.update_variables()
                 self._datafile.append_to_csv(self._variables.latest_values)
                 if self.debug:

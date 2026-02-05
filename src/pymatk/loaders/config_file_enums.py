@@ -10,8 +10,7 @@ class InstrumentEnums(StrEnum):
     KWARGS = "kwargs"
     INITIALISE = "initialise"
     INIT_FUNC = "init_func"
-    PROPERTY = "is_property"
-    VALUE = "value"
+    INIT_VALUE = "init_value"
 
 
 class VariableEnums(StrEnum):
