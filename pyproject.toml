@@ -10,7 +10,6 @@ requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.4.2",
     "pandas>=3.0.0",
-    "pymeasure>=0.13.1",
     "ruff>=0.14.14",
     "simple-pid>=2.0.1",
 ]

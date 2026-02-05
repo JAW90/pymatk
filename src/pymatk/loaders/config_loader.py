@@ -62,33 +62,65 @@ class ConfigLoader:
 
     def load_instruments(self):
         self._instruments = {}
-        for instrument_name, config in self._config[InstrumentEnums.INSTRUMENTS].items():
-            if config[InstrumentEnums.MODULE] not in sys.modules:
+        for instrument_name, instrument_config in self._config[
+            InstrumentEnums.INSTRUMENTS
+        ].items():
+            if instrument_config[InstrumentEnums.MODULE] not in sys.modules:
                 try:
-                    module = importlib.import_module(config[InstrumentEnums.MODULE])
+                    module = importlib.import_module(instrument_config[InstrumentEnums.MODULE])
                 except ImportError:
                     raise ImportError(
-                        f"Cannot import module '{config[InstrumentEnums.MODULE]}'!"
+                        f"Cannot import module '{instrument_config[InstrumentEnums.MODULE]}'!"
                         + " Check Python environment (module may not be installed) or"
                         + " configuration file (misconfigured)."
                     )
             else:
-                module = sys.modules[config[InstrumentEnums.MODULE]]
+                module = sys.modules[instrument_config[InstrumentEnums.MODULE]]
 
-            if InstrumentEnums.CLASS not in config:
+            if InstrumentEnums.CLASS not in instrument_config:
                 self._instruments[instrument_name] = module
             else:
                 try:
-                    cls = getattr(module, config[InstrumentEnums.CLASS])
+                    cls = getattr(module, instrument_config[InstrumentEnums.CLASS])
                 except AttributeError:
                     raise AttributeError(
                         f"Cannot find class {cls} in module {module}!"
                         + " Check configuration file for typos."
                     )
-                if InstrumentEnums.KWARGS not in config:
+                if InstrumentEnums.KWARGS not in instrument_config:
                     self._instruments[instrument_name] = cls()
                 else:
-                    self._instruments[instrument_name] = cls(**config[InstrumentEnums.KWARGS])
+                    self._instruments[instrument_name] = cls(
+                        **instrument_config[InstrumentEnums.KWARGS]
+                    )
+            if InstrumentEnums.INITIALISE in instrument_config:
+                for entry in instrument_config[InstrumentEnums.INITIALISE]:
+                    if entry.get(InstrumentEnums.PROPERTY) and entry.get(InstrumentEnums.VALUE):
+                        try:
+                            setattr(
+                                self._instruments[instrument_name],
+                                entry[InstrumentEnums.INIT_FUNC],
+                                entry[InstrumentEnums.VALUE],
+                            )
+                        except AttributeError:
+                            raise AttributeError(
+                                "Cannot initialise property "
+                                + f"'{instrument_name}:{entry[InstrumentEnums.INIT_FUNC]}'"
+                                + f" with value {entry[InstrumentEnums.VALUE]}. Check configuration."
+                            )
+                    else:
+                        try:
+                            getattr(
+                                self._instruments[instrument_name],
+                                entry[InstrumentEnums.INIT_FUNC],
+                            )(**entry[InstrumentEnums.KWARGS])
+                        except AttributeError:
+                            raise AttributeError(
+                                "Cannot call function "
+                                + f"'{instrument_name}:{entry[InstrumentEnums.INIT_FUNC]}'"
+                                + f" with arguments {entry[InstrumentEnums.KWARGS]}."
+                                + " Check configuration."
+                            )
 
     def initialise_variables(self):
         if self._instruments is None:

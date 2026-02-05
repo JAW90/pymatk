@@ -4,6 +4,7 @@ from typing import Dict
 
 # TODO: Add docstrings
 
+
 @dataclass
 class ExperimentVariable:
     units: str | None
