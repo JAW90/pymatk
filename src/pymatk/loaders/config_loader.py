@@ -191,7 +191,7 @@ class ConfigLoader:
             raise AttributeError("No valid instruments.")
 
         self._variables = VariablesCollection(self.description)
-        for instrument_name, variable in self._config[VariableEnums.VARIABLES].items():
+        for instrument_name, variables in self._config[VariableEnums.VARIABLES].items():
             if instrument_name not in self._instruments:
                 raise KeyError(
                     f"'{instrument_name}' not in this collection."
@@ -199,13 +199,22 @@ class ConfigLoader:
                 )
             else:
                 instrument = self._instruments[instrument_name]
-                for var_name, parameters in variable.items():
+                for variable in variables:
+                    print(variable)
+                    print(type(variable))
                     # dict.get returns None if not present
-                    return_element = parameters.get(VariableEnums.RETURN_ELEMENT)
-                    units = parameters.get(VariableEnums.UNITS)
-                    get_func = parameters[VariableEnums.GET_FUNCTION]
-                    method = _handle_get_function(instrument, get_func, return_element)
-                    self._variables.add_variable(var_name, units, method)
+                    if VariableEnums.NAME in variable:
+                        var_name = variable[VariableEnums.NAME]
+                        return_element = variable.get(VariableEnums.RETURN_ELEMENT)
+                        units = variable.get(VariableEnums.UNITS)
+                        get_func = variable[VariableEnums.GET_FUNCTION]
+                        method = _handle_get_function(instrument, get_func, return_element)
+                        self._variables.add_variable(var_name, units, method)
+                    else:
+                        raise KeyError(
+                            f"No valid variable {VariableEnums.NAME}!" +
+                            " Check configuration."
+                        )
 
     @property
     def instruments(self):

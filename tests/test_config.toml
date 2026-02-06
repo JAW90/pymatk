@@ -5,21 +5,38 @@ filestem = "my_basic_manager"
 [instruments.TIME_KEEPER]
 module = "pymatk.software_instruments"
 class = "TimeKeeper"
-initialise = [{init_func = "restart"}]
+
+[[instruments.TIME_KEEPER.initialise]]
+init_func = "restart"
 
 [instruments.RANDOMGEN]
 module = "pymatk.software_instruments"
 class = "RandomGenerator"
 
-[variables.TIME_KEEPER]
-time = {units = "s", get_func= "elapsed_time"}
-unix_time = {units = "s", get_func= "unix_time"}
+[[instruments.RANDOMGEN.initialise]]
+init_func = "set_param"
+init_value = 51
 
-[variables.RANDOMGEN]
-one_random_prop = {get_func= "new_random_number"}
-one_random_func = {get_func= "get_random_number"}
-two_randoms_prop = {get_func= "two_random_numbers", return_element=0}
-two_randoms_func = {get_func= "get_two_random_numbers", return_element=1}
+[[variables.TIME_KEEPER]]
+name = "time"
+units = "s"
+get_func= "elapsed_time"
+
+[[variables.TIME_KEEPER]]
+name = "unix_time"
+units = "s"
+get_func= "unix_time"
+
+[[variables.RANDOMGEN]]
+name = "one_random_prop" 
+get_func = "new_random_number"
+
+[[variables.RANDOMGEN]]
+name = "param_prop" 
+get_func = "param"
+# one_random_func = {get_func= "get_random_number"}
+# two_randoms_prop = {get_func= "two_random_numbers", return_element=0}
+# two_randoms_func = {get_func= "get_two_random_numbers", return_element=1}
 
 
 # [instruments.CLOCK]

@@ -15,6 +15,7 @@ class InstrumentEnums(StrEnum):
 
 class VariableEnums(StrEnum):
     VARIABLES = "variables"
+    NAME = "name"
     UNITS = "units"
     GET_FUNCTION = "get_func"
     PROPERTY = "is_property"
