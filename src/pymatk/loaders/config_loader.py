@@ -120,7 +120,7 @@ def _handle_set_function(
                     getattr(instrument, init_func)(**init_kwargs)
 
                 else:
-                    getattr(instrument, init_func)(**init_kwargs)
+                    getattr(instrument, init_func)(init_value, **init_kwargs)
 
         except AttributeError:
             raise AttributeError(
