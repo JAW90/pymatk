@@ -1,40 +1,20 @@
-import importlib
-import sys
-
 from pymatk.data_structures import VariablesCollection, DataConfig
-from pymatk.loaders import InstrumentEnums, VariableEnums, DataEnums
+from pymatk.loaders import (
+    InstrumentEnums,
+    VariableEnums,
+    DataEnums,
+    _handle_get_function,
+    _handle_set_function,
+    _import_instrument,
+)
 
 # TODO: Add docstrings
-
-
-def _create_property_to_function(
-    instrument: object, prop: str, return_element: int | str | None = None
-):
-    if return_element is not None:
-
-        def property_element_to_function():
-            return getattr(instrument, prop)[return_element]
-
-        return property_element_to_function
-    else:
-
-        def property_to_function():
-            return getattr(instrument, prop)
-
-        return property_to_function
-
-
-# TODO: Implement instruments initialisation
 
 
 class ConfigLoader:
     def __init__(self, description: str, config: dict):
         self.description = description
         self._config = config
-        # self._data_config = None
-        # self._instruments = None
-        # self._variables = None
-        # self._outputs = None
 
         if DataEnums.DATA in self._config:
             self.load_data_config()
@@ -62,40 +42,38 @@ class ConfigLoader:
 
     def load_instruments(self):
         self._instruments = {}
-        for instrument_name, config in self._config[InstrumentEnums.INSTRUMENTS].items():
-            if config[InstrumentEnums.MODULE] not in sys.modules:
-                try:
-                    module = importlib.import_module(config[InstrumentEnums.MODULE])
-                except ImportError:
-                    raise ImportError(
-                        f"Cannot import module '{config[InstrumentEnums.MODULE]}'!"
-                        + " Check Python environment (module may not be installed) or"
-                        + " configuration file (misconfigured)."
-                    )
-            else:
-                module = sys.modules[config[InstrumentEnums.MODULE]]
+        for instrument_name, instrument_config in self._config[
+            InstrumentEnums.INSTRUMENTS
+        ].items():
+            module_name = instrument_config.get(InstrumentEnums.MODULE)
+            class_name = instrument_config.get(InstrumentEnums.CLASS)
+            instrument_kwargs = instrument_config.get(InstrumentEnums.KWARGS)
 
-            if InstrumentEnums.CLASS not in config:
-                self._instruments[instrument_name] = module
-            else:
-                try:
-                    cls = getattr(module, config[InstrumentEnums.CLASS])
-                except AttributeError:
-                    raise AttributeError(
-                        f"Cannot find class {cls} in module {module}!"
-                        + " Check configuration file for typos."
-                    )
-                if InstrumentEnums.KWARGS not in config:
-                    self._instruments[instrument_name] = cls()
-                else:
-                    self._instruments[instrument_name] = cls(**config[InstrumentEnums.KWARGS])
+            self._instruments[instrument_name] = _import_instrument(
+                module_name, class_name, instrument_kwargs
+            )
+
+            initialise_conditions = instrument_config.get(InstrumentEnums.INITIALISE)
+            if initialise_conditions is not None:
+                instrument = self._instruments[instrument_name]
+                for condition in initialise_conditions:
+                    init_func = condition.get(InstrumentEnums.INIT_FUNC)
+                    if init_func is None:
+                        raise AttributeError(
+                            f"No function/property {InstrumentEnums.INIT_FUNC} provided to"
+                            + " initialise! Check configuration."
+                        )
+
+                    init_func_kwargs = condition.get(InstrumentEnums.KWARGS)
+                    init_value = condition.get(InstrumentEnums.INIT_VALUE)
+                    _handle_set_function(instrument, init_func, init_value, init_func_kwargs)
 
     def initialise_variables(self):
         if self._instruments is None:
             raise AttributeError("No valid instruments.")
 
         self._variables = VariablesCollection(self.description)
-        for instrument_name, variable in self._config[VariableEnums.VARIABLES].items():
+        for instrument_name, variables in self._config[VariableEnums.VARIABLES].items():
             if instrument_name not in self._instruments:
                 raise KeyError(
                     f"'{instrument_name}' not in this collection."
@@ -103,29 +81,19 @@ class ConfigLoader:
                 )
             else:
                 instrument = self._instruments[instrument_name]
-                for var_name, parameters in variable.items():
-                    return_element = parameters.get(
-                        VariableEnums.RETURN_ELEMENT
-                    )  # Returns None if not present
-                    if VariableEnums.PROPERTY not in parameters:
-                        method = getattr(
-                            instrument,
-                            parameters[VariableEnums.GET_FUNCTION],
-                            return_element,
-                        )
-                    elif parameters[VariableEnums.PROPERTY]:
-                        method = _create_property_to_function(
-                            instrument,
-                            parameters[VariableEnums.GET_FUNCTION],
-                            return_element,
-                        )
+                for variable in variables:
+                    # dict.get returns None if not present
+                    if VariableEnums.NAME in variable:
+                        var_name = variable[VariableEnums.NAME]
+                        return_element = variable.get(VariableEnums.RETURN_ELEMENT)
+                        units = variable.get(VariableEnums.UNITS)
+                        get_func = variable[VariableEnums.GET_FUNCTION]
+                        method = _handle_get_function(instrument, get_func, return_element)
+                        self._variables.add_variable(var_name, instrument_name, units, method)
                     else:
-                        raise AttributeError("Bad Configuration {}".format(parameters))
-                    self._variables.add_variable(
-                        var_name,
-                        parameters[VariableEnums.UNITS],
-                        method,
-                    )
+                        raise KeyError(
+                            f"No valid variable {VariableEnums.NAME}!" + " Check configuration."
+                        )
 
     @property
     def instruments(self):

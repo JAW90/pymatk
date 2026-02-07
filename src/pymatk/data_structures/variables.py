@@ -4,9 +4,11 @@ from typing import Dict
 
 # TODO: Add docstrings
 
+
 @dataclass
 class ExperimentVariable:
     units: str | None
+    instrument_name: str
     get_func: Callable
     _value: object = None
 
@@ -29,18 +31,23 @@ class VariablesCollection:
 
     # TODO: add __str__ function?
 
-    def add_variable(self, name: str, units: str | None, get_function: Callable):
+    def add_variable(
+        self, name: str, units: str | None, instrument_name: str, get_function: Callable
+    ):
         if name in self._variables:
             raise KeyError(
                 f"Variable with {name} already added to" + f" {type(self).__name__} '{self.name}'."
             )
         else:
-            new_variable = ExperimentVariable(units, get_function)
+            new_variable = ExperimentVariable(units, instrument_name, get_function)
             self._variables[name] = new_variable
 
     @property
     def variables_as_columns(self) -> list:
-        columns = [f"{name}({variable.units})" for name, variable in self._variables.items()]
+        columns = [
+            f"{name}({variable.units})" if variable.units is not None else f"{name}"
+            for name, variable in self._variables.items()
+        ]
         return columns
 
     @property
@@ -50,7 +57,9 @@ class VariablesCollection:
     @property
     def latest_values(self) -> dict:
         variables_values = {
-            f"{name}({variable.units})": variable._value
+            (
+                f"{name}({variable.units})" if variable.units is not None else f"{name}:"
+            ): variable._value
             for name, variable in self._variables.items()
         }
         return variables_values

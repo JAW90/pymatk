@@ -20,30 +20,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flexcache"
-version = "0.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/55/b0/8a21e330561c65653d010ef112bf38f60890051d244ede197ddaa08e50c1/flexcache-0.3.tar.gz", hash = "sha256:18743bd5a0621bfe2cf8d519e4c3bfdf57a269c15d1ced3fb4b64e0ff4600656", size = 15816, upload-time = "2024-03-09T03:21:07.555Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl", hash = "sha256:d43c9fea82336af6e0115e308d9d33a185390b8346a017564611f1466dcd2e32", size = 13263, upload-time = "2024-03-09T03:21:05.635Z" },
-]
-
-[[package]]
-name = "flexparser"
-version = "0.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/82/99/b4de7e39e8eaf8207ba1a8fa2241dd98b2ba72ae6e16960d8351736d8702/flexparser-0.4.tar.gz", hash = "sha256:266d98905595be2ccc5da964fe0a2c3526fbbffdc45b65b3146d75db992ef6b2", size = 31799, upload-time = "2024-11-07T02:00:56.249Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl", hash = "sha256:3738b456192dcb3e15620f324c447721023c0293f6af9955b481e91d00179846", size = 27625, upload-time = "2024-11-07T02:00:54.523Z" },
-]
-
-[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -175,30 +151,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pint"
-version = "0.25.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "flexcache" },
-    { name = "flexparser" },
-    { name = "platformdirs" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/74/bc3f671997158aef171194c3c4041e549946f4784b8690baa0626a0a164b/pint-0.25.2.tar.gz", hash = "sha256:85a45d1da8fe9c9f7477fed8aef59ad2b939af3d6611507e1a9cbdacdcd3450a", size = 254467, upload-time = "2025-11-06T22:08:09.184Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/88/550d41e81e6d43335603a960cd9c75c1d88f9cf01bc9d4ee8e86290aba7d/pint-0.25.2-py3-none-any.whl", hash = "sha256:ca35ab1d8eeeb6f7d9942b3cb5f34ca42b61cdd5fb3eae79531553dcca04dda7", size = 306762, upload-time = "2025-11-06T22:08:07.745Z" },
-]
-
-[[package]]
-name = "platformdirs"
-version = "4.5.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cf/86/0248f086a84f01b37aaec0fa567b397df1a119f73c16f6c7a9aac73ea309/platformdirs-4.5.1.tar.gz", hash = "sha256:61d5cdcc6065745cdd94f0f878977f8de9437be93de97c1c12f853c9c0cdcbda", size = 21715, upload-time = "2025-12-05T13:52:58.638Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/28/3bfe2fa5a7b9c46fe7e13c97bda14c895fb10fa2ebf1d0abb90e0cea7ee1/platformdirs-4.5.1-py3-none-any.whl", hash = "sha256:d03afa3963c806a9bed9d5125c8f4cb2fdaf74a55ab60e5d59b3fde758104d31", size = 18731, upload-time = "2025-12-05T13:52:56.823Z" },
-]
-
-[[package]]
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -223,7 +175,6 @@ source = { editable = "." }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
-    { name = "pymeasure" },
     { name = "ruff" },
     { name = "simple-pid" },
 ]
@@ -237,51 +188,12 @@ dev = [
 requires-dist = [
     { name = "numpy", specifier = ">=2.4.2" },
     { name = "pandas", specifier = ">=3.0.0" },
-    { name = "pymeasure", specifier = ">=0.13.1" },
     { name = "ruff", specifier = ">=0.14.14" },
     { name = "simple-pid", specifier = ">=2.0.1" },
 ]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=9.0.2" }]
-
-[[package]]
-name = "pymeasure"
-version = "0.13.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "pint" },
-    { name = "pyqtgraph" },
-    { name = "pyserial" },
-    { name = "pyvisa" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/ac/3f2da45208869b33a537b2bd1814849bada6d86909c5a480f17ea841af54/PyMeasure-0.13.1.tar.gz", hash = "sha256:6c6f101407fef1a2218c63f333d0eeeb3c5cf614433d3a1331480988022ad520", size = 3748305, upload-time = "2023-10-05T19:52:29.807Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/54/b8/301c374f28d860540470cca29ed3d05db9496a6481e5f33cac28d1148fad/PyMeasure-0.13.1-py3-none-any.whl", hash = "sha256:d2b8b3f39a715987a1b16b256ef8e20092bf61d0d39a22849f2ad1b2bae4d885", size = 679902, upload-time = "2023-10-05T19:52:22.826Z" },
-]
-
-[[package]]
-name = "pyqtgraph"
-version = "0.14.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "colorama" },
-    { name = "numpy" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/36/4c242f81fdcbfa4fb62a5645f6af79191f4097a0577bd5460c24f19cc4ef/pyqtgraph-0.14.0-py3-none-any.whl", hash = "sha256:7abb7c3e17362add64f8711b474dffac5e7b0e9245abdf992e9a44119b7aa4f5", size = 1924755, upload-time = "2025-11-16T19:43:22.251Z" },
-]
-
-[[package]]
-name = "pyserial"
-version = "3.5"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb", size = 159125, upload-time = "2020-11-23T03:59:15.045Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/bc/587a445451b253b285629263eb51c2d8e9bcea4fc97826266d186f96f558/pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0", size = 90585, upload-time = "2020-11-23T03:59:13.41Z" },
-]
 
 [[package]]
 name = "pytest"
@@ -309,18 +221,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
-]
-
-[[package]]
-name = "pyvisa"
-version = "1.16.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/45/b2cf76f58097040827fc6c61af4cb3ae473ef2fa47bc4f3e582e95fab3a0/pyvisa-1.16.1.tar.gz", hash = "sha256:44d637ef977097cae6247ce621514739e7a68b0e1d683d4e4b191b67f5b4d7b3", size = 238621, upload-time = "2026-01-13T14:47:26.361Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/1e/701cde98f835aaf84cd17851103715615a5ccb2f3d2ce3e215df8b5a4550/pyvisa-1.16.1-py3-none-any.whl", hash = "sha256:b0109a146f1d1a5d66d988fd5ea2a2abafb526f276d7cd60bfdba784513de3a7", size = 181348, upload-time = "2026-01-13T14:47:23.722Z" },
 ]
 
 [[package]]
@@ -365,15 +265,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
-]
-
-[[package]]
-name = "typing-extensions"
-version = "4.15.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391, upload-time = "2025-08-25T13:49:26.313Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614, upload-time = "2025-08-25T13:49:24.86Z" },
 ]
 
 [[package]]

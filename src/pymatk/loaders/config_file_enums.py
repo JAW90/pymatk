@@ -8,10 +8,14 @@ class InstrumentEnums(StrEnum):
     MODULE = "module"
     CLASS = "class"
     KWARGS = "kwargs"
+    INITIALISE = "initialise"
+    INIT_FUNC = "init_func"
+    INIT_VALUE = "init_value"
 
 
 class VariableEnums(StrEnum):
     VARIABLES = "variables"
+    NAME = "name"
     UNITS = "units"
     GET_FUNCTION = "get_func"
     PROPERTY = "is_property"
