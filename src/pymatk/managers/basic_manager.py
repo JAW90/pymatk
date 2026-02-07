@@ -59,11 +59,13 @@ class BasicManager:
         create_directory(path)
         self._datafile = DataFile(filename, columns)
 
+    def stop(self):
+        self._running = False
+
     def _main_loop(self):
-        while True:
-            if self._running:
-                self._variables.update_variables()
-                self._datafile.append_to_csv(self._variables.latest_values)
-                if self.debug:
-                    print(self._variables.latest_values)
-                time.sleep(self._update_time)
+        while self._running:
+            self._variables.update_variables()
+            self._datafile.append_to_csv(self._variables.latest_values)
+            if self.debug:
+                print(self._variables.latest_values)
+            time.sleep(self._update_time)

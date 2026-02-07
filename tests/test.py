@@ -7,4 +7,4 @@ man = BasicManager("testing_BM", config, debug=True, running=True)
 
 time.sleep(5)
 
-man._running = False
+man.stop()

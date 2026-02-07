@@ -8,6 +8,7 @@ from typing import Dict
 @dataclass
 class ExperimentVariable:
     units: str | None
+    instrument_name: str
     get_func: Callable
     _value: object = None
 
@@ -30,13 +31,15 @@ class VariablesCollection:
 
     # TODO: add __str__ function?
 
-    def add_variable(self, name: str, units: str | None, get_function: Callable):
+    def add_variable(
+        self, name: str, units: str | None, instrument_name: str, get_function: Callable
+    ):
         if name in self._variables:
             raise KeyError(
                 f"Variable with {name} already added to" + f" {type(self).__name__} '{self.name}'."
             )
         else:
-            new_variable = ExperimentVariable(units, get_function)
+            new_variable = ExperimentVariable(units, instrument_name, get_function)
             self._variables[name] = new_variable
 
     @property
