@@ -1,39 +1,47 @@
 [data]
-output_directory = "C:\\data\\joe"
+parent_directory = "C:\\data\\joe"
 filestem = "my_basic_manager"
+
+# [instruments]
+# TIME_KEEPER = {module = "pymatk.software_instruments", class="TimeKeeper"}
+# RANDOMGEN
 
 [instruments.TIME_KEEPER]
 module = "pymatk.software_instruments"
 class = "TimeKeeper"
 
-[[instruments.TIME_KEEPER.initialise]]
+[[TIME_KEEPER.variables]]
+name = "time"
+units = "s"
+get_func = "elapsed_time"
+
+[[TIME_KEEPER.variables]]
+name = "unix_time"
+units = "s"
+get_func = "unix_time"
+
+[[TIME_KEEPER.initial_settings]]
 init_func = "restart"
 
 [instruments.RANDOMGEN]
 module = "pymatk.software_instruments"
 class = "RandomGenerator"
 
-[[instruments.RANDOMGEN.initialise]]
+[[RANDOMGEN.initial_settings]]
 init_func = "set_param"
 init_value = 51
 
-[[variables.TIME_KEEPER]]
-name = "time"
-units = "s"
-get_func= "elapsed_time"
-
-[[variables.TIME_KEEPER]]
-name = "unix_time"
-units = "s"
-get_func= "unix_time"
-
-[[variables.RANDOMGEN]]
+[[RANDOMGEN.variables]]
 name = "one_random_prop" 
 get_func = "new_random_number"
 
-[[variables.RANDOMGEN]]
-name = "param_prop" 
+[[RANDOMGEN.variables]]
+name = "param_prop"
 get_func = "param"
+
+# [[variables.RANDOMGEN]]
+# name = "param_prop" 
+# get_func = "param"
 # one_random_func = {get_func= "get_random_number"}
 # two_randoms_prop = {get_func= "two_random_numbers", return_element=0}
 # two_randoms_func = {get_func= "get_two_random_numbers", return_element=1}

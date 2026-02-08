@@ -2,8 +2,9 @@ import threading
 import time
 import tomllib
 
-from pymatk.data_structures import DataFile, create_directory
-from pymatk.loaders import ConfigLoader
+from pymatk.config_parser import ConfigParser
+from pymatk.data_writer import DataWriter
+from pymatk.instruments import InstrumentRack
 
 # TODO: Implement logging and debugging
 
@@ -40,32 +41,35 @@ class BasicManager:
         except FileNotFoundError:
             print(f"Config file not found: {config_file}")
 
-        cfg_loader = ConfigLoader(self.description, self._config)
+        cfg_parser = ConfigParser(self.description, self._config)
 
-        self._instruments = cfg_loader.instruments
-        self._variables = cfg_loader.variables
-        self._data_config = cfg_loader.data_config
+        self._instrument_rack = InstrumentRack(
+            self.description, cfg_parser.parse_instrument_configurations()
+        )
+
+        self._data_writer = DataWriter(
+            *cfg_parser.parse_data_config(), self._instrument_rack.get_variable_names(units=True)
+        )
+
+        self._instrument_rack.instantiate_instruments()
+        self._instrument_rack.initialise_settings()
+        self._instrument_rack.configure_variables()
 
         self._thread = threading.Thread(target=self._main_loop, daemon=True)
 
         if running:
-            self.setup_new_datafile()
+            self._data_writer.create_new_file()
             self._thread.start()
 
-    def setup_new_datafile(self):
-        path, name = self._data_config.generate_new_file_path()
-        filename = f"{path}/{name}.csv"
-        columns = self._variables.variables_as_columns
-        create_directory(path)
-        self._datafile = DataFile(filename, columns)
+    @property
+    def instrument_rack(self):
+        return self._instrument_rack
 
     def stop(self):
         self._running = False
 
     def _main_loop(self):
         while self._running:
-            self._variables.update_variables()
-            self._datafile.append_to_csv(self._variables.latest_values)
-            if self.debug:
-                print(self._variables.latest_values)
+            self._instrument_rack.read_instruments()
+            self._data_writer.write_data(self._instrument_rack.get_variable_values(units=True))
             time.sleep(self._update_time)

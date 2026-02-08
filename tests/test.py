@@ -1,5 +1,10 @@
-from pymatk.managers import BasicManager
+import logging
 import time
+
+from pymatk.managers import BasicManager
+from pymatk.logging import logger
+
+logger.setLevel(logging.DEBUG)
 
 config = "test_config.toml"
 
