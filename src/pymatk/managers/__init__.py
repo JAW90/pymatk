@@ -1,2 +1,1 @@
-from .basic_manager import BasicManager
-from .experiment_manager import ExperimentManager
+from .simple_manager import SimpleManager

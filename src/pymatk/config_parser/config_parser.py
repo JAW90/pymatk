@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 
 from pymatk.instruments import Instrument, InstrumentSetting, InstrumentVariable
-from pymatk.config_parser import InstrumentConfigEnums, DataConfigEnums
+from pymatk.config_parser import InstrumentConfigEnums, DataConfigEnums, ControllerConfigEnums
 
 # TODO: Add docstrings
 
@@ -34,19 +34,23 @@ class ConfigParser:
             )
             self._instrument_configurations[instrument_name] = new_instrument
 
-            initial_settings = self._config[instrument_name].get(
-                InstrumentConfigEnums.INIT_SETTINGS
-            )
+            settings = self._config[instrument_name].get(InstrumentConfigEnums.SETTINGS)
 
-            if initial_settings is not None:
-                for setting in initial_settings:
+            if settings is not None:
+                for setting in settings:
+                    set_name = setting.get(InstrumentConfigEnums.NAME)
+                    if set_name is None:
+                        raise KeyError(
+                            f"No valid setting {InstrumentConfigEnums.NAME}!"
+                            + " Check configuration."
+                        )
                     set_func = setting.get(InstrumentConfigEnums.SET_FUNC)
                     set_kwargs = setting.get(InstrumentConfigEnums.KWARGS)
                     set_value = setting.get(InstrumentConfigEnums.SET_VALUE)
                     new_setting = InstrumentSetting(
-                        new_instrument, set_func, set_value, set_kwargs
+                        set_name, new_instrument, set_func, set_value, set_kwargs
                     )
-                    new_instrument.initial_settings.append(new_setting)
+                    new_instrument.settings[set_name] = new_setting
 
             variables = self._config[instrument_name].get(InstrumentConfigEnums.VARIABLES)
 
@@ -64,6 +68,17 @@ class ConfigParser:
                     new_variable = InstrumentVariable(
                         variable_name, units, new_instrument, get_func, return_element
                     )
-                    new_instrument.variables.append(new_variable)
+                    new_instrument.variables[variable_name] = new_variable
 
         return self._instrument_configurations
+
+    def parse_controller_configuration(self):
+        self._controller_configurations = {}
+        for controller_name, controller_config in self._config[
+            ControllerConfigEnums.CONTROLLERS
+        ].items():
+            module_name = controller_config.get(ControllerConfigEnums.MODULE)
+            class_name = controller_config.get(ControllerConfigEnums.CLASS)
+            controller_kwargs = controller_config.get(ControllerConfigEnums.KWARGS)
+            print(controller_name, controller_config)
+            # new_controller =

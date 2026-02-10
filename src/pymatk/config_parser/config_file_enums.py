@@ -8,9 +8,9 @@ class InstrumentConfigEnums(StrEnum):
     MODULE = "module"
     CLASS = "class"
     KWARGS = "kwargs"
-    INIT_SETTINGS = "initial_settings"
-    SET_FUNC = "init_func"
-    SET_VALUE = "init_value"
+    SETTINGS = "settings"
+    SET_FUNC = "set_func"
+    SET_VALUE = "set_value"
     VARIABLES = "variables"
     NAME = "name"
     UNITS = "units"
@@ -22,3 +22,10 @@ class DataConfigEnums(StrEnum):
     DATA = "data"
     PARENT_DIRECTORY = "parent_directory"
     FILESTEM = "filestem"
+
+
+class ControllerConfigEnums(StrEnum):
+    CONTROLLERS = "controllers"
+    MODULE = "module"
+    CLASS = "class"
+    KWARGS = "kwargs"

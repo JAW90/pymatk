@@ -4,3 +4,4 @@ from .instruments import (
     InstrumentSetting,
     InstrumentRack,
 )
+from .instrument_controller import InstrumentController

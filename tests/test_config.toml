@@ -20,24 +20,33 @@ name = "unix_time"
 units = "s"
 get_func = "unix_time"
 
-[[TIME_KEEPER.initial_settings]]
-init_func = "restart"
+[[TIME_KEEPER.settings]]
+name = "restart"
+set_func = "restart"
 
 [instruments.RANDOMGEN]
 module = "pymatk.software_instruments"
 class = "RandomGenerator"
 
-[[RANDOMGEN.initial_settings]]
-init_func = "set_param"
-init_value = 51
+[[RANDOMGEN.settings]]
+name = "set_parameter"
+set_func = "set_param"
+set_value = 51
 
 [[RANDOMGEN.variables]]
 name = "one_random_prop" 
 get_func = "new_random_number"
 
 [[RANDOMGEN.variables]]
-name = "param_prop"
-get_func = "param"
+name = "get_param"
+get_func = "get_param"
+
+[controllers.SIMPLE]
+module = "pymatk.controllers"
+class = "TestController"
+input = "TIME_KEEPER.time"
+output = "RANDOMGEN.set_parameter"
+
 
 # [[variables.RANDOMGEN]]
 # name = "param_prop" 

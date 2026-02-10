@@ -1,3 +1,5 @@
+from pymatk.abstract_classes import Subject
+
 __name__ = "pymatk"
 
 

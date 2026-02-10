@@ -16,7 +16,7 @@ class DataWriter:
 
     def create_new_file(self):
         self.header = ",".join(self.columns)
-        self.filename,  self.out_directory = self.get_new_file_and_path()
+        self.filename, self.out_directory = self.get_new_file_and_path()
         self.full_file_path = f"{self.out_directory}/{self.filename}"
         self.create_directory(self.out_directory)
         with open(self.full_file_path, "w") as f:
