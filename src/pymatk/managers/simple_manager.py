@@ -51,9 +51,9 @@ class SimpleManager:
 
         self.cfg_parser.parse_controller_configuration()
 
-        self._instrument_rack.instantiate_instruments()
-        self._instrument_rack.apply_initial_settings()
-        self._instrument_rack.configure_variables()
+        # self._instrument_rack.instantiate_instruments()
+        # self._instrument_rack.apply_initial_settings()
+        # self._instrument_rack.configure_variables()
 
         self._thread = threading.Thread(target=self._main_loop, daemon=True)
 
@@ -76,5 +76,5 @@ class SimpleManager:
     def _main_loop(self):
         while self._running:
             self._instrument_rack.read_instruments()
-            self._data_writer.write_data(self._instrument_rack.get_variable_values(units=True))
+            self._data_writer.write_data(self._instrument_rack.readings)
             time.sleep(self._update_time)

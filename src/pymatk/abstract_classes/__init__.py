@@ -1,2 +1,2 @@
 from .subject_observer import Subject, Observer
-from .controller import ControllerBase
+from .controller import Controller

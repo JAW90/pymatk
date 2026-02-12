@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List
+from typing import Dict, List
 
 from pymatk.abstract_classes import Observer, Subject
 from pymatk.logging import logger
@@ -32,47 +32,22 @@ class Instrument(Subject):
         self.settings = settings
         self.variables = variables
 
-        self._instantiated = False
         self._observers: List[Observer] = []
 
-    def instantiate_instrument(self):
-        if not self._instantiated:
-            self._instance = _import_instrument(self.module, self.class_name, self.kwargs)
-            self._instantiated = True
+        self._instance = _import_instrument(self.module, self.class_name, self.kwargs)
 
-    def apply_initial_settings(self):
-        if not self._instantiated:
-            raise Exception(
-                f"This instrument {self.name} has not been insantiated - cannot initialise."
-            )
-        else:
-            for setting in self.settings.values():
-                if setting.set_value is not None:
-                    setting.apply_setting()
-
-    def configure_variables(self):
-        if not self._instantiated:
-            raise Exception(
-                f"This instrument {self.name} has not been instantiated"
-                + " - cannot configure variables."
-            )
-        else:
-            for variable in self.variables.values():
-                variable.configure()
-        self._configured = True
+        for setting in self.settings.values():
+            if setting.set_value is not None:
+                setting.apply_setting()
 
     def read(self):
-        if not self._configured:
-            raise Exception(f"Variables of '{self.name}' have not been configured.")
-        else:
-            for variable in self.variables.values():
-                variable.read()
-            self.notify()
+        for variable in self.variables.values():
+            variable.read()
+        self.notify()
 
     @property
     def instance(self):
-        if self._instantiated:
-            return self._instance
+        return self._instance
 
     def attach(self, observer: Observer) -> None:
         self._observers.append(observer)
@@ -80,12 +55,12 @@ class Instrument(Subject):
     def detach(self, observer: Observer) -> None:
         self._observers.remove(observer)
 
-    def notify(self):
+    def notify(self) -> None:
         for observer in self._observers:
             observer.update(self)
 
-    def get_variable_value(self, name):
-        return self.variables[name].value
+    def get_variable(self, name: str) -> InstrumentVariable:
+        return self.variables[name]
 
     def update_setting(
         self, setting_name: str, set_value: int | float | str | bool, set_kwargs=None
@@ -97,19 +72,28 @@ class Instrument(Subject):
         setting.apply_setting()
 
 
-@dataclass
-class InstrumentVariable:
-    name: str
-    units: str | None
-    instrument: Instrument
-    get_func: str
-    return_element: int | str | None = None
-    _value: int | float | str | bool | None = None
-    _method: Callable | None = None
+class InstrumentVariable(Subject):
+    def __init__(
+        self,
+        name: str,
+        units: str | None,
+        parent_instrument: Instrument,
+        get_func: str,
+        return_element: int | str | None = None,
+    ):
+        self.name = name
+        self.units = units
+        self.parent_instrument = parent_instrument
+        self.get_func = get_func
+        self.return_element = return_element
 
-    def configure(self):
+        self._value = None
+        self._method = None
+
+        self._observers: List[Observer] = []
+
         self._method = _handle_get_function(
-            self.instrument.instance, self.get_func, self.return_element
+            self.parent_instrument.instance, self.get_func, self.return_element
         )
 
     def read(self):
@@ -117,11 +101,30 @@ class InstrumentVariable:
             self._value = self._method()
         else:
             raise Exception(f"Cannot call get method on variable {self.name}.")
+        self.notify()
         return self._value
 
     @property
     def value(self):
         return self._value
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self):
+        for observer in self._observers:
+            observer.update(self)
+
+
+# TODO: Implement ControllerVariable
+
+
+class ControllerVariable(InstrumentVariable):
+    def __init__(self):
+        pass
 
 
 @dataclass
@@ -138,7 +141,7 @@ class InstrumentSetting:
         )
 
 
-class InstrumentRack:
+class InstrumentRack(Subject):
     def __init__(self, name: str, instruments: Dict[str, Instrument] | None = None):
         self.name = name
 
@@ -148,6 +151,10 @@ class InstrumentRack:
             raise TypeError("Argument 'instruments' must either be None or Dict[str,Instrument].")
         else:
             self._instruments = {}
+
+        self._observers = []
+
+        self._controllers = {}
 
     def __repr__(self) -> str:
         response = f"{self.__class__.__name__}: '{self.name}'"
@@ -171,18 +178,6 @@ class InstrumentRack:
         else:
             self._instruments[instrument.name] = instrument
 
-    def instantiate_instruments(self):
-        [instrument.instantiate_instrument() for instrument in self._instruments.values()]
-        logger.info("Instruments instantiated.")
-
-    def apply_initial_settings(self):
-        [instrument.apply_initial_settings() for instrument in self._instruments.values()]
-        logger.info("Initial settings applied.")
-
-    def configure_variables(self):
-        [instrument.configure_variables() for instrument in self._instruments.values()]
-        logger.info("Variables configured.")
-
     def get_variable_names(self, units=False) -> List[str]:
         all_variables = []
         for instrument in self._instruments.values():
@@ -196,15 +191,31 @@ class InstrumentRack:
 
     def read_instruments(self):
         [instrument.read() for instrument in self._instruments.values()]
-        logger.debug("Read instruments:\n" + f"{self.get_variable_values(units=True)}")
+        logger.debug("Read instruments:\n" + f"{self.readings}")
+        # Read controller variables
+        # Store last set of readings in memory
+        # Notify observers, e.g. DataWriter
+        self.notify()
 
-    def get_variable_values(self, units=False) -> Dict[str, object]:
-        all_values = {}
-        for instrument in self._instruments.values():
+    @property
+    def readings(self) -> Dict[str, object] | None:
+        readings = {}
+        for instrument in [*self._instruments.values(), *self._controllers.values()]:
             for variable in instrument.variables.values():
-                if units and variable.units is not None:
+                if variable.units is not None:
                     name_format = f"{variable.name}({variable.units})"
                 else:
                     name_format = f"{variable.name}"
-                all_values[name_format] = variable.value
-        return all_values
+                readings[name_format] = variable.value
+
+        return readings
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self):
+        for observer in self._observers:
+            observer.update(self)

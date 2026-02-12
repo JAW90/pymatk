@@ -1,33 +1,20 @@
 from abc import abstractmethod
+from typing import Any
 
 from pymatk.abstract_classes import Subject, Observer
 
 
-class ControllerBase(Observer):
+class Controller(Observer):
     @abstractmethod
     def update(self, subject: Subject) -> None:
         pass
 
+    @property
     @abstractmethod
-    def update_output(self) -> None:
+    def setpoint(self) -> Any:
         pass
 
+    @setpoint.getter
     @abstractmethod
-    def configure_input(self) -> None:
-        pass
-
-    @abstractmethod
-    def configure_output(self) -> None:
-        pass
-
-    @abstractmethod
-    def configure_state(self) -> None:
-        pass
-
-    @abstractmethod
-    def start(self) -> None:
-        pass
-
-    @abstractmethod
-    def stop(self) -> None:
+    def setpoint(self, setpoint: Any) -> None:
         pass

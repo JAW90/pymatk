@@ -1,4 +1,5 @@
-from pymatk.abstract_classes import Subject
+# from pymatk.abstract_classes import Subject
+from .managers import ExecutionContext
 
 __name__ = "pymatk"
 

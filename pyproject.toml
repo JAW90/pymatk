@@ -31,3 +31,5 @@ managed = true
 
 [tool.ruff]
 line-length = 99
+ignore-init-module-imports = true
+
